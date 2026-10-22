@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hobby streaks</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap">
+<style>
+:root{
+  --bg:#EDF0F4; --ink:#1B2340; --muted:#5E6A85; --line:#CDD4E0; --cell:#DCE2EC; --panel:#F8F9FB;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#171C2E; --ink:#E8ECF6; --muted:#9AA5C0; --line:#2C3552; --cell:#262F4A; --panel:#1E2540}
+}
+:root[data-theme="dark"]{--bg:#171C2E; --ink:#E8ECF6; --muted:#9AA5C0; --line:#2C3552; --cell:#262F4A; --panel:#1E2540}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+main{max-width:860px;margin:0 auto;padding:40px 20px 80px}
+h1{font-size:clamp(2.4rem,7vw,4rem);line-height:1;margin:0 0 6px;font-weight:800;letter-spacing:-.03em}
+.sub{color:var(--muted);margin:0 0 32px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid #2F6FED;outline-offset:2px}
+.add{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-bottom:12px}
+.add input{flex:1 1 200px;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.swatches{display:flex;gap:8px}
+.sw{width:26px;height:26px;border-radius:50%;border:3px solid transparent;background:var(--c);padding:0}
+.sw[aria-checked="true"]{border-color:var(--ink)}
+.go{padding:10px 18px;border:0;border-radius:8px;background:var(--ink);color:var(--bg);font-weight:600}
+.hobby{display:grid;grid-template-columns:minmax(0,220px) 1fr;gap:20px 32px;padding:28px 0;border-bottom:1px solid var(--line);align-items:center}
+.name{font-size:1.4rem;font-weight:600;margin:0;overflow-wrap:anywhere}
+.big{font-size:3.4rem;font-weight:800;line-height:1;letter-spacing:-.04em;color:var(--c);margin:8px 0 2px}
+.big small{font-size:1rem;font-weight:400;color:var(--muted);letter-spacing:0;margin-left:6px}
+.meta{color:var(--muted);font-size:.9rem;margin:0 0 14px}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.log{padding:9px 16px;border-radius:8px;border:2px solid var(--c);background:transparent;font-weight:600}
+.log[aria-pressed="true"]{background:var(--c);color:#fff}
+.rm{background:none;border:0;color:var(--muted);text-decoration:underline;padding:4px;font-size:.85rem}
+.gridwrap{overflow-x:auto;padding-bottom:4px}
+.grid{display:grid;grid-template-rows:repeat(7,16px);grid-auto-flow:column;grid-auto-columns:16px;gap:4px;width:max-content}
+.cell{width:16px;height:16px;padding:0;border:0;border-radius:4px;background:var(--cell)}
+.cell.on{background:var(--c)}
+.cell.today{outline:2px solid var(--ink);outline-offset:1px}
+.cell.future{visibility:hidden}
+.empty{padding:48px 0;color:var(--muted);text-align:center}
+.hint{color:var(--muted);font-size:.85rem;margin:8px 0 0}
+.summary{display:flex;flex-wrap:wrap;gap:8px 28px;margin:0 0 20px;color:var(--muted)}
+.summary strong{color:var(--ink);font-weight:600}
+.note{width:100%;margin:0 0 14px;font:inherit;font-size:.9rem;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 0}
+.tools button{padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.data{display:none;margin-top:12px}
+.data.open{display:block}
+.data textarea{width:100%;min-height:120px;font:12px/1.4 ui-monospace,monospace;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.data p{margin:6px 0 0;color:var(--muted);font-size:.85rem}
+.tabs{display:flex;gap:6px;margin:28px 0 0;border-bottom:1px solid var(--line)}
+.tab{padding:10px 16px;border:0;background:none;color:var(--muted);font-weight:600;border-bottom:3px solid transparent;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--ink)}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin:24px 0 12px}
+.calhead h2{margin:0;font-size:1.4rem}
+.calhead button{width:40px;height:40px;border:1px solid var(--line);border-radius:8px;background:var(--panel);font-size:1.2rem}
+.calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.wd{text-align:center;color:var(--muted);font-size:.85rem;padding:4px 0}
+.day{min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 2px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.day.today{border:2px solid var(--ink)}
+.day.sel{background:var(--cell)}
+.dots{display:flex;flex-wrap:wrap;gap:3px;justify-content:center}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.daypanel{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.daypanel h3{margin:0 0 12px;font-size:1.1rem}
+.dayhobby{margin:0 8px 8px 0;padding:8px 14px;border-radius:8px;border:2px solid var(--c);background:transparent;font-weight:600}
+.dayhobby[aria-pressed="true"]{background:var(--c);color:#fff}
+.dayhobby:disabled{opacity:.4;cursor:default}
+@media (max-width:640px){.hobby{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.cell,.log,.sw{transition:background .15s,border-color .15s}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Hobby streaks</h1>
+  <p class="sub" id="today"></p>
+  <div class="summary" id="summary"></div>
+
+  <div class="add" role="group" aria-label="Add a hobby">
+    <input id="name" type="text" maxlength="40" placeholder="Hobby name, like guitar or running" aria-label="Hobby name">
+    <div class="swatches" id="swatches" role="radiogroup" aria-label="Colour"></div>
+    <button class="go" id="add">Add hobby</button>
+  </div>
+  <p class="hint">Tap a square to log or unlog any day in the last 14 weeks. Add a note to today’s entry to remember what you did.</p>
+  <div class="tools">
+    <button id="theme">Switch theme</button>
+    <button id="show">Back up data</button>
+    <button id="load">Restore from backup</button>
+  </div>
+  <div class="data" id="data">
+    <textarea id="blob" aria-label="Backup data" spellcheck="false"></textarea>
+    <p id="datamsg"></p>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-view="streaks" aria-selected="true">Streaks</button>
+    <button class="tab" role="tab" data-view="cal" aria-selected="false">Calendar</button>
+  </div>
+  <section id="list" aria-live="polite"></section>
+  <section id="cal" hidden></section>
+</main>
+
+<script>
+var KEY = 'hobby-streaks-v1';
+var COLORS = ['#E4572E','#17A398','#E0A100','#6C5CE7','#D6457F','#4C9A2A'];
+var state = { hobbies: [] };
+var picked = COLORS[0];
+var pendingRemove = null;
+
+try { var raw = localStorage.getItem(KEY); if (raw) state = JSON.parse(raw); } catch (e) {}
+if (!state || !Array.isArray(state.hobbies)) state = { hobbies: [] };
+
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+function pad(n){ return String(n).padStart(2,'0'); }
+function fmt(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function noon(d){ var x = new Date(d); x.setHours(12,0,0,0); return x; }
+function addDays(d,n){ var x = new Date(d); x.setDate(x.getDate()+n); return x; }
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+function streaks(h){
+  var set = new Set(h.days), t = noon(new Date());
+  var d = set.has(fmt(t)) ? t : addDays(t,-1), cur = 0;
+  while (set.has(fmt(d))) { cur++; d = addDays(d,-1); }
+  var sorted = Array.from(set).sort(), best = 0, run = 0, prev = null;
+  sorted.forEach(function(k){
+    var dt = new Date(k+'T12:00:00');
+    run = (prev && Math.round((dt-prev)/864e5) === 1) ? run+1 : 1;
+    if (run > best) best = run;
+    prev = dt;
+  });
+  return { cur: cur, best: best, total: sorted.length };
+}
+
+function gridHTML(h, i){
+  var set = new Set(h.days), today = noon(new Date());
+  var dow = (today.getDay()+6)%7;
+  var start = addDays(today, -(13*7 + dow)), out = '';
+  for (var n = 0; n < 14*7; n++){
+    var d = addDays(start, n), k = fmt(d), future = d > today;
+    var cls = 'cell' + (set.has(k)?' on':'') + (k===fmt(today)?' today':'') + (future?' future':'');
+    var label = d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
+    out += '<button class="'+cls+'" data-act="day" data-i="'+i+'" data-d="'+k+'" aria-label="'+label+(set.has(k)?', logged':', not logged')+'" title="'+label+(h.notes&&h.notes[k]?' – '+esc(h.notes[k]):'')+'"'+(future?' tabindex="-1" aria-hidden="true"':'')+'></button>';
+  }
+  return out;
+}
+
+function render(){
+  renderSummary();
+  renderCalendar();
+  var list = document.getElementById('list');
+  if (!state.hobbies.length){
+    list.innerHTML = '<p class="empty">No hobbies yet. Add one above to start your first streak.</p>';
+    return;
+  }
+  var todayKey = fmt(noon(new Date()));
+  list.innerHTML = state.hobbies.map(function(h,i){
+    var s = streaks(h), done = h.days.indexOf(todayKey) > -1;
+    var unit = s.cur === 1 ? 'day' : 'days';
+    return '<article class="hobby" style="--c:'+h.color+'">'+
+      '<div><h2 class="name">'+esc(h.name)+'</h2>'+
+      '<p class="big">'+s.cur+'<small>'+unit+' in a row</small></p>'+
+      '<p class="meta">Best '+s.best+' · '+s.total+' logged in total · '+weekCount(h)+' of the last 7 days</p>'+
+      '<input class="note" data-act="note" data-i="'+i+'" maxlength="80" placeholder="Note for today" aria-label="Note for today" value="'+esc((h.notes&&h.notes[todayKey])||'')+'">'+
+      '<div class="actions"><button class="log" data-act="today" data-i="'+i+'" aria-pressed="'+done+'">'+(done?'Logged today':'Log today')+'</button>'+
+      '<button class="rm" data-act="rm" data-i="'+i+'">'+(pendingRemove===i?'Confirm remove':'Remove')+'</button></div></div>'+
+      '<div class="gridwrap"><div class="grid">'+gridHTML(h,i)+'</div></div></article>';
+  }).join('');
+}
+
+function weekCount(h){
+  var set = new Set(h.days), t = noon(new Date()), n = 0;
+  for (var i = 0; i < 7; i++){ if (set.has(fmt(addDays(t,-i)))) n++; }
+  return n;
+}
+
+function renderSummary(){
+  var el = document.getElementById('summary'), hs = state.hobbies;
+  if (!hs.length){ el.innerHTML = ''; return; }
+  var tk = fmt(noon(new Date())), done = 0, top = null, total = 0;
+  hs.forEach(function(h){
+    var s = streaks(h); total += s.total;
+    if (h.days.indexOf(tk) > -1) done++;
+    if (s.cur > 0 && (!top || s.cur > top.cur)) top = { name: h.name, cur: s.cur };
+  });
+  el.innerHTML = '<span><strong>'+done+' of '+hs.length+'</strong> logged today</span>'+
+    '<span><strong>'+total+'</strong> days logged overall</span>'+
+    (top ? '<span>Longest running streak: <strong>'+esc(top.name)+'</strong>, '+top.cur+(top.cur===1?' day':' days')+'</span>' : '');
+}
+
+function toggle(i, key){
+  var h = state.hobbies[i], p = h.days.indexOf(key);
+  if (p > -1) h.days.splice(p,1); else h.days.push(key);
+  save(); render();
+}
+
+document.getElementById('list').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-act]'); if (!b) return;
+  var i = +b.dataset.i, act = b.dataset.act;
+  if (act === 'today') { pendingRemove = null; toggle(i, fmt(noon(new Date()))); }
+  else if (act === 'day') { pendingRemove = null; toggle(i, b.dataset.d); }
+  else if (act === 'rm') {
+    if (pendingRemove === i) { state.hobbies.splice(i,1); pendingRemove = null; save(); }
+    else pendingRemove = i;
+    render();
+  }
+});
+
+document.getElementById('list').addEventListener('change', function(e){
+  var el = e.target.closest('input[data-act="note"]'); if (!el) return;
+  var h = state.hobbies[+el.dataset.i]; h.notes = h.notes || {};
+  var k = fmt(noon(new Date())), v = el.value.trim();
+  if (v) h.notes[k] = v; else delete h.notes[k];
+  save();
+});
+
+function setMsg(t){ document.getElementById('datamsg').textContent = t; }
+document.getElementById('show').addEventListener('click', function(){
+  document.getElementById('data').classList.add('open');
+  var t = document.getElementById('blob'); t.value = JSON.stringify(state); t.focus(); t.select();
+  setMsg('Copy this text and keep it somewhere safe.');
+});
+document.getElementById('load').addEventListener('click', function(){
+  var box = document.getElementById('data'), t = document.getElementById('blob');
+  if (!box.classList.contains('open')){
+    box.classList.add('open'); t.value = ''; t.focus();
+    setMsg('Paste your backup text here, then choose Restore from backup again.'); return;
+  }
+  try {
+    var d = JSON.parse(t.value);
+    if (!d || !Array.isArray(d.hobbies)) throw 0;
+    d.hobbies.forEach(function(h){ if (!h.name || !Array.isArray(h.days)) throw 0; h.color = h.color || COLORS[0]; });
+    state = d; save(); render(); setMsg('Backup restored.');
+  } catch (err) { setMsg('That text isn’t a valid backup. Paste the full text from Back up data.'); }
+});
+
+var theme = null;
+try { theme = localStorage.getItem('hobby-theme'); } catch (e) {}
+if (theme) document.documentElement.dataset.theme = theme;
+document.getElementById('theme').addEventListener('click', function(){
+  var cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  var next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem('hobby-theme', next); } catch (e) {}
+});
+
+var calMonth = (function(){ var t = new Date(); return new Date(t.getFullYear(), t.getMonth(), 1, 12); })();
+var calSel = fmt(noon(new Date()));
+
+function renderCalendar(){
+  var el = document.getElementById('cal'); if (!el) return;
+  var y = calMonth.getFullYear(), m = calMonth.getMonth(), hs = state.hobbies;
+  var lead = (new Date(y, m, 1, 12).getDay() + 6) % 7, days = new Date(y, m+1, 0).getDate();
+  var tk = fmt(noon(new Date()));
+  var out = '<div class="calhead"><button data-cal="prev" aria-label="Previous month">‹</button><h2>'+
+    calMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'})+
+    '</h2><button data-cal="next" aria-label="Next month">›</button></div><div class="calgrid">';
+  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(function(w){ out += '<div class="wd">'+w+'</div>'; });
+  for (var i = 0; i < lead; i++) out += '<div></div>';
+  for (var d = 1; d <= days; d++){
+    var key = y+'-'+pad(m+1)+'-'+pad(d), dots = '', n = 0;
+    hs.forEach(function(h){ if (h.days.indexOf(key) > -1){ n++; dots += '<i style="--c:'+h.color+'"></i>'; } });
+    out += '<button class="day'+(key===tk?' today':'')+(key===calSel?' sel':'')+'" data-d="'+key+'" aria-label="'+
+      d+' '+calMonth.toLocaleDateString(undefined,{month:'long'})+', '+n+' logged"><span>'+d+'</span><span class="dots">'+dots+'</span></button>';
+  }
+  out += '</div>';
+  var fut = calSel > tk, notes = '';
+  out += '<div class="daypanel"><h3>'+new Date(calSel+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'})+'</h3>';
+  if (!hs.length) out += '<p class="meta">Add a hobby above to start logging.</p>';
+  hs.forEach(function(h,i){
+    out += '<button class="dayhobby" style="--c:'+h.color+'" data-cal="tog" data-i="'+i+'" aria-pressed="'+(h.days.indexOf(calSel)>-1)+'"'+(fut?' disabled':'')+'>'+esc(h.name)+'</button>';
+    if (h.notes && h.notes[calSel]) notes += '<p class="meta"><strong>'+esc(h.name)+':</strong> '+esc(h.notes[calSel])+'</p>';
+  });
+  el.innerHTML = out + notes + '</div>';
+}
+
+document.getElementById('cal').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-cal],button[data-d]'); if (!b) return;
+  if (b.dataset.cal === 'prev' || b.dataset.cal === 'next'){
+    calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + (b.dataset.cal === 'next' ? 1 : -1), 1, 12);
+    renderCalendar();
+  } else if (b.dataset.cal === 'tog'){ toggle(+b.dataset.i, calSel); }
+  else if (b.dataset.d){ calSel = b.dataset.d; renderCalendar(); }
+});
+
+document.querySelector('.tabs').addEventListener('click', function(e){
+  var b = e.target.closest('.tab'); if (!b) return;
+  document.getElementById('list').hidden = b.dataset.view !== 'streaks';
+  document.getElementById('cal').hidden = b.dataset.view !== 'cal';
+  document.querySelectorAll('.tab').forEach(function(t){ t.setAttribute('aria-selected', String(t === b)); });
+});
+
+function renderSwatches(){
+  document.getElementById('swatches').innerHTML = COLORS.map(function(c){
+    return '<button class="sw" role="radio" aria-checked="'+(c===picked)+'" aria-label="Colour '+c+'" data-c="'+c+'" style="--c:'+c+'"></button>';
+  }).join('');
+}
+document.getElementById('swatches').addEventListener('click', function(e){
+  var b = e.target.closest('.sw'); if (!b) return;
+  picked = b.dataset.c; renderSwatches();
+});
+
+function addHobby(){
+  var input = document.getElementById('name'), name = input.value.trim();
+  if (!name) { input.focus(); return; }
+  state.hobbies.push({ name: name, color: picked, days: [] });
+  input.value = ''; save(); render();
+}
+document.getElementById('add').addEventListener('click', addHobby);
+document.getElementById('name').addEventListener('keydown', function(e){ if (e.key === 'Enter') addHobby(); });
+
+document.getElementById('today').textContent = new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+renderSwatches();
+render();
+</script>
+</body>
+</html>
